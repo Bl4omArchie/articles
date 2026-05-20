@@ -226,11 +226,8 @@ The execution time heavily depends on your network download speed. Let's create 
 ## Benchmark
 
 With the `time` library, you can wrap every function with a start value and an elapsed value.
-```go
-Now the script is ready to be compiled and runned.
-```go 
-go build -o bulk_data.o main.go 
-./bulk_data.o
+
+
 ```go
 	startRequest := time.Now()
 	// request the blocklist from our source
