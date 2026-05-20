@@ -1,4 +1,4 @@
-# Bulk data ingestion with DuckDB in Golang using. Threat Intelligence use case.
+# Bulk data ingestion with DuckDB using Golang. Threat Intelligence use case.
 
 
 In this article, I demonstrate how to use the Appender feature to insert large amounts of data into duck using Golang.
