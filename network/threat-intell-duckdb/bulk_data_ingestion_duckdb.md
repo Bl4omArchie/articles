@@ -1,15 +1,24 @@
-# Bulk data ingestion with DuckDB using Golang. Threat Intelligence use case.
+# Threat-Intelligence with DuckDB (part 1)
+
+# 1- Bulk data ingestion
 
 
-In this article, I demonstrate how to use the Appender feature to insert large amounts of data into duck using Golang.
+In this tutorial, we will insert bulk data into DuckDB using Golang. I'll demonstrate how to use the Appender feature to insert large amounts of data as the Appender enables extremely fast bulk inserts (ms for +100K IP addresses).
 
-The Appender enables extremely fast bulk inserts (ms for +100K IP addresses).
+In order to illustrate this feature, I'll use a Threat-Intelligence use case where we store IP addresses from a blocklist into DuckDB.
 
-In order to illustrate this feature, I'll use a Threat-Intelligence use case where we store IP addresses from blocklist into DuckDB.
+For this matter I will use the [DataShieldIpv4](https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt) IP blocklist maintained by [Laurent Minne](https://github.com/duggytuxy) Which contains over 100k IPv4 addresses identified as malicious.
 
-For this matter I will use the [DataShieldIpv4](https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt) IP blocklist maintained by [Laurent Minne](https://github.com/duggytuxy).
 
-Which contains over 100k IPv4 addresses identified as malicious.
+# Table of contents
+1. [Database setup](#database-setup)
+2. [Request DataShieldIpv4](#request-datashieldipv4)
+3. [IP addresses parsing](#ip-addresses-parsing)
+4. [Bulk data insertion](#bulk-data-insertion)
+5. [Read table and end of script](#read-table-and-end-of-script)
+6. [Benchmark](#benchmark)
+7. [Conclusion](#conclusion)
+
 
 # Tutorial
 
@@ -55,7 +64,7 @@ if err != nil {
 
 Now that our database is setup, we can get the IPs from blocklist.
 
-## Request the blocklist
+## Request DataShieldIpv4
 
 Let's create a simple HTTP client and get the IPs.
 ```go
@@ -83,21 +92,21 @@ func RequestBlocklist() ([]byte, error) {
 }
 ```
 
-## IP parsing
+## IP addresses parsing
 
 As we want to avoid any inconvenience, we are going to parse every IP addresses that we are getting from our source.
 Let's use the `net` library with the `net.IP` struct and the `net.ParseIP()` function.
 
 ```go
 func ParseIPs(body []byte) []net.IP {
-	var parsedUrls []net.IP
+	var parsedIPs []net.IP
 
 	content := strings.SplitSeq(string(body), "\n")
 	for ip := range content {
-		parsedUrls = append(parsedUrls, net.ParseIP(ip))
+		parsedIPs = append(parsedIPs, net.ParseIP(ip))
 	}
 
-	return parsedUrls
+	return parsedIPs
 }
 ```
 
@@ -148,7 +157,7 @@ The connection is now established with the connector, we can call the Appender A
 
 We loop over each IP, we convert them into `string` and the `AppendRow()` function make the magic happens.
 
-## End of the script and print ip_blocklist table
+## Read table and end of script
 
 Before running the script, let's create a simple `ReadTable` function so we can see from our eyes the result
 
@@ -280,7 +289,7 @@ After several runs, these are the observed results:
 As mentioned earlier, the overall execution time is largely dominated by the RequestBlocklist() function and therefore heavily depends on network download speed.
 
 
-# Conclusion
+## Conclusion
 
 In this blog post, we explored how to use the Appender() DuckDB API to efficiently insert bulk data into a database.
 
