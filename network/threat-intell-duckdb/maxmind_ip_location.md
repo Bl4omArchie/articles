@@ -1,20 +1,16 @@
 # Threat-Intelligence with DuckDB (part 2)
 
-# 2- IP location with MaxMind database
+# Data Enrichment with MaxMind
 
-In the last tutorial we saw how to ingest bulk data with DuckDB in Golang with the Appender API. Now that we have a database full of IP addresses from the [DataShieldIpv4](https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt), one cool thing will be to geo-locate them. 
+In the last tutorial we saw how to ingest bulk data with DuckDB in Golang with the Appender API. Now that we have a database full of IP addresses from the [DataShieldIpv4](https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt), one cool thing will be enrich our database with additional data like geo-location, ASN, dns etc. 
 
-There are the intelligence we want to gather for each IP address for this tutorial.
-- Location: country, city
+In this tutorial, we will gather the following intelligence for each IP address:
+- City
+- Country
+- ASN
 - DNS
-- Ping statistics: rtt, is alive
-
-
-This is what we are going to do in this new tutorial: geo-locate IP addresses from the DataShieldIpv4 blocklist and get additionnal infos such as DNS.
-
-
-
-
+- IsAlive
+- PingStatistics
 
 # Table of contents
 1. [Database setup](#database-setup)
@@ -37,4 +33,3 @@ This is what we are going to do in this new tutorial: geo-locate IP addresses fr
 ## Reverse DNS
 
 ## Conclusion
-
