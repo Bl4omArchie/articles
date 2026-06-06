@@ -6,17 +6,14 @@ In this tutorial, we will see different ways to convert a CSV file into parquet 
 
 # Setup
 
-Create a python environnement and download the dask and pyarrow package
+Execute the bash script that will deploy the python environnement en download two CSV dataset.
+
 ```bash
-python3 -m ven venv
-source env/bin/activate
-pip3 install dask[dataframe], pyarrow
+chmod +x build-python.sh
+./build-python.sh
 ```
 
-Then download a random CSV file. In my case I am using the hikari dataset.
-https://zenodo.org/records/5199540
-
-# Tutotial
+# Tutorial
 To improve storage efficiency and read performance
 **Warm-up**
 
@@ -29,13 +26,13 @@ df = dd.read_csv("hikari.csv")
 print(df.head)
 ```
 
-**1- Convert it to parquet**
+**1- Convert csv to parquet**
 
 [Full dask Documentation](https://docs.dask.org/en/stable/generated/dask.dataframe.to_parquet.html)
 
 Now we shall convert our CSV into parquet format
 ```python
-df = dd.read_csv("dataset.csv")
+df = dd.read_csv("hikari.csv")
 df.to_parquet("output/")
 
 df_parquet = dd.read_parquet("output/")
@@ -74,6 +71,9 @@ print(df_parquet.head())
 In order to keep tracks of our parquet partition, lets create a map that will keep the initial CSV name binded to our multiple parquet files.
 
 ```python
+src = Path(".")
+dst = Path("output")
+dst.mkdir(exist_ok=True)
 results = {}
 
 # Read every csv
@@ -83,8 +83,8 @@ csv_files = list(src.glob("*.csv"))
 for csv_file in csv_files:
     name = csv_file.stem
 
-    df = dd.read_csv(csv_file, blocksize=25e6, assume_missing=True)
-    df.to_parquet(dst, compression="zstd", name_function=lambda i: f"{name}_part_{i}.parquet")
+    df = dd.read_csv(csv_file)
+    df.to_parquet(dst, compression="zstd", write_index=False, name_function=lambda i: f"{name}_part_{i}.parquet")
 
     parts = sorted(str(p) for p in dst.glob(f"{name}_*.parquet"))
     results[name] = parts
@@ -103,9 +103,11 @@ In order to give a different name for each partition file, we create a lambda fu
 You can also export only selected columns to reduce memory usage and improve performance on large datasets.
 
 ```python
-df = dd.read_csv('dataset.csv', usecols=['col1', 'col2', 'col3'])
-df[['col1']].to_parquet('parquet_col1/', write_index=False)
-df[['col2']].to_parquet('parquet_col2/', write_index=False)
+df = dd.read_csv('hikari.csv', usecols=["traffic_category", "Label"])
+df.to_parquet('parquet_col/', write_index=False)
+
+df_parquet = dd.read_parquet("parquet_col/")
+print(df_parquet.head())
 ```
 
 # Notes
